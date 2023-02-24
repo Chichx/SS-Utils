@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Threading;
@@ -33,7 +33,8 @@ namespace SSUtils
             Console.WriteLine("[2] Partition Disks");
             Console.WriteLine("[3] Executed Programs");
             Console.WriteLine("[4] Pcasvc");
-            Console.WriteLine("[5] Credits");
+            Console.WriteLine("[5] Macros Finder");
+            Console.WriteLine("[6] Credits");
             Console.Write("Your choice: ");
             int option = Convert.ToInt32(Console.ReadLine());
             switch (option)
@@ -65,6 +66,11 @@ namespace SSUtils
                     PcaSvc(args);
                     break;
                 case 5:
+                    Console.Title = $"github.com/Chichx | Macros Finder";
+                    Console.Clear();
+                    Macros(args);
+                    break;
+                case 6:
                     Console.Title = $"github.com/Chichx | Credits";
                     Console.Clear();
                     Credits(args);
@@ -137,7 +143,9 @@ namespace SSUtils
             Main(args);
         }
 
-        static CheckInfo checkTimeModification() 
+
+
+        static CheckInfo checkTimeModification()
         {
             EventRecord entry;
             string logPath = @"C:\Windows\System32\winevt\Logs\Security.evtx";
@@ -159,31 +167,31 @@ namespace SSUtils
             return new CheckInfo(false);
         }
 
-    class PartitionInfo
-    {
-        public PartitionInfo(char letter, bool isMounted)
+        class PartitionInfo
         {
-            this.Letter = letter;
-            this.IsMounted = isMounted;
+            public PartitionInfo(char letter, bool isMounted)
+            {
+                this.Letter = letter;
+                this.IsMounted = isMounted;
+            }
+
+            public char Letter { get; }
+            public bool IsMounted { get; }
         }
 
-        public char Letter { get; }
-        public bool IsMounted { get; }
-    }
-
-    class DiskLog
-    {
-        public DiskLog(string name, DateTime? generatedAt, long? recordIdentifier)
+        class DiskLog
         {
-            this.Name = name;
-            this.Time = generatedAt;
-            this.Id = recordIdentifier;
-        }
+            public DiskLog(string name, DateTime? generatedAt, long? recordIdentifier)
+            {
+                this.Name = name;
+                this.Time = generatedAt;
+                this.Id = recordIdentifier;
+            }
 
-        public string Name { get; }
-        public DateTime? Time { get; }
-        public long? Id { get; }
-    }
+            public string Name { get; }
+            public DateTime? Time { get; }
+            public long? Id { get; }
+        }
 
         private static void Partition(string[] args)
         {
@@ -258,7 +266,7 @@ namespace SSUtils
         {
             EventRecord entry;
             List<DiskLog> disksLogs = new List<DiskLog>();
-            string logPath = @"C:\Windows\System32\winevt\Logs\Microsoft-Windows-StorageSpaces-Driver%4Operational.evtx"; 
+            string logPath = @"C:\Windows\System32\winevt\Logs\Microsoft-Windows-StorageSpaces-Driver%4Operational.evtx";
             EventLogReader logReader = new EventLogReader(logPath, PathType.FilePath);
             DateTime pcStartTime = startTime();
 
@@ -410,7 +418,7 @@ namespace SSUtils
 
             Console.Write("\n\nPress ENTER to go to the menu...");
             if (!save) Console.ReadLine();
-            Console.Clear();    
+            Console.Clear();
             Main(args);
         }
 
@@ -593,12 +601,59 @@ namespace SSUtils
             Console.ReadLine();
             Console.Clear();
             Main(args);
-         
+
         }
 
         static bool isChar(byte b)
         {
             return (b >= 32 && b <= 126) || b == 10 || b == 13 || b == 9;
+        }
+
+        private static void Macros(string[] args)
+        {
+            Console.WriteLine("Scan Started... Please Wait");
+            Console.WriteLine();
+
+            CheckFile(Environment.SpecialFolder.LocalApplicationData, "LGHUB/settings.db", "Logitech mouse detected, Config file Modified at: {0}");
+            CheckDirectory(Environment.SpecialFolder.ApplicationData, "BYCOMBO-2/mac", "Glorious mouse detected, Config folder Modified at: {0}");
+            CheckFile(Environment.SpecialFolder.ApplicationData, "corsair/CUE/config.cuecfg", "Corsair (CUE) mouse detected, Config file Modified at: {0}");
+            CheckFile(Environment.SpecialFolder.ApplicationData, "corsair/CUE4/config.cuecfg", "Corsair (CUE4) mouse detected, Config file Modified at: {0}");
+            CheckDirectory(Environment.SpecialFolder.ApplicationData, "corsair/CUE4/Profiles", "Corsair (CUE4) mouse detected, Config folder Modified at: {0}");
+            CheckDirectory(Environment.SpecialFolder.ApplicationData, "corsair/CUE/Profiles", "Corsair (CUE) mouse detected, Config folder Modified at: {0}");
+            CheckFile(Environment.SpecialFolder.ProgramFilesX86, "Bloody7/Bloody7/UserLog/Mouse/TLcir_9EFF3FF4/language/Settings/EnvironmentVar.ini", "Bloody mouse detected, Config file Modified at: {0}");
+            CheckFile(Environment.SpecialFolder.ApplicationData, "steelseries-engine-3-client/Session Storage/000003.log", "Steelseries mouse detected, Config file Modified at: {0}");
+            CheckFile(Environment.SpecialFolder.CommonApplicationData, "Alienware/AlienWare Command Center/fxmetadata/.json", "Alienware mouse detected, Config file Modified at: {0}");
+            CheckFile(Environment.SpecialFolder.ProgramFiles, "Gaming MouseV30/record.ini", "Motospeed mouse detected, Config file Modified at: {0}");
+            CheckFile(Environment.SpecialFolder.ProgramFilesX86, "Gaming Mouse/Config.ini", "Marsgaming mouse detected, Config file Modified at: {0}");
+
+            Console.Write("\n\nPress ENTER to go to the menu...");
+            Console.ReadLine();
+            Console.Clear();
+            Main(args);
+
+        }
+        private static void CheckFile(Environment.SpecialFolder folder, string path, string message)
+        {
+            string fullPath = Path.Combine(Environment.GetFolderPath(folder), path);
+
+            if (File.Exists(fullPath))
+            {
+                DateTime lastWriteTime = File.GetLastWriteTime(fullPath);
+                Console.WriteLine(string.Format(message, lastWriteTime));
+                Console.WriteLine();
+            }
+        }
+
+        private static void CheckDirectory(Environment.SpecialFolder folder, string path, string message)
+        {
+            string fullPath = Path.Combine(Environment.GetFolderPath(folder), path);
+
+            if (Directory.Exists(fullPath))
+            {
+                DateTime lastWriteTime = Directory.GetLastWriteTime(fullPath);
+                Console.WriteLine(string.Format(message, lastWriteTime));
+                Console.WriteLine();
+            }
         }
 
         static DateTime startTime()
